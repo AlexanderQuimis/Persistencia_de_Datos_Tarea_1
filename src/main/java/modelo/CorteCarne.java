@@ -1,10 +1,10 @@
 package modelo;
-
+import modelo.Proveedor;
 import jakarta.persistence.*;
 // indica que esta clase es una tabla en la base de datos
 @Entity
 // define el nombre de la tabla
-@Table(name = "alexander_paltas_u1")
+@Table(name = "corte_carne")
 public class CorteCarne {
 // indica la clave primaria
     @Id
@@ -16,7 +16,19 @@ public class CorteCarne {
     private int gramaje;
     private double precio;
     private String termino;
+    
+     // 🔗 RELACIÓN MUCHOS A UNO
+    @ManyToOne
+    @JoinColumn(name = "proveedor_id")
+    private Proveedor proveedor;
 
+    public Proveedor getProveedor() {
+    return proveedor;
+    }
+
+    public void setProveedor(Proveedor proveedor) {
+        this.proveedor = proveedor;
+    }
     // GETTERS Y SETTERS
 
     public int getId() { return id; }

@@ -2,20 +2,23 @@ package repository;
 
 import modelo.CorteCarne;
 import util.JPAUtil;
-
+import modelo.Proveedor;
 import jakarta.persistence.EntityManager;
 import java.util.List;
 
 public class CorteCarneRepository {
 
     // CREATE
-    public void guardar(CorteCarne carne) {
+    public void guardar(CorteCarne carne, Proveedor p) {
+
         EntityManager em = JPAUtil.getEntityManager();
-        // Inicia una transacción
         em.getTransaction().begin();
-        // Guarda el objeto en la BD
-        em.persist(carne);
-         // Confirma cambios
+
+        em.persist(p);              // 👈 primero proveedor
+        carne.setProveedor(p);      // relación
+
+        em.persist(carne);          // luego corte
+
         em.getTransaction().commit();
         em.close();
     }
@@ -54,4 +57,42 @@ public class CorteCarneRepository {
         em.getTransaction().commit();
         em.close();
     }
+    //Consulta Where - ejemplo 1
+    public List<CorteCarne> listarCaros() {
+    EntityManager em = JPAUtil.getEntityManager();
+
+    List<CorteCarne> lista = em.createQuery(
+        "SELECT c FROM CorteCarne c WHERE c.precio > 20",
+        CorteCarne.class
+    ).getResultList();
+
+    em.close();
+    return lista;
+}
+    // Ejemplo 2 - Inner Join
+    public List<CorteCarne> porProveedor(String nombre) {
+    EntityManager em = JPAUtil.getEntityManager();
+
+    List<CorteCarne> lista = em.createQuery(
+        "SELECT c FROM CorteCarne c WHERE c.proveedor.nombre = :nombre",
+        CorteCarne.class
+    )
+    .setParameter("nombre", nombre)
+    .getResultList();
+
+    em.close();
+    return lista;
+}
+    //Ejemplo 3. Left Join
+    public List<Object[]> contarPorProveedor() {
+    EntityManager em = JPAUtil.getEntityManager();
+
+    List<Object[]> lista = em.createQuery(
+        "SELECT c.proveedor.nombre, COUNT(c) " +
+        "FROM CorteCarne c GROUP BY c.proveedor.nombre"
+    ).getResultList();
+
+    em.close();
+    return lista;
+}
 }
